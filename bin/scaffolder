@@ -1,0 +1,11 @@
+#!/usr/bin/env perl
+
+package
+	scaffolder;
+
+# ABSTRACT: Application for scaffoldind using templates
+
+use strict;
+use warnings;
+use App::Scaffolder;
+App::Scaffolder->run();
