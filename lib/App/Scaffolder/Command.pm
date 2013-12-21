@@ -237,8 +237,8 @@ sub execute {
 	my ($self, $opt, $args) = @_;
 
 	if ($opt->list()) {
-		print "Available templates:\n ";
-		print join ",\n ", sort keys %{$self->get_templates()};
+		print "Available templates for ".$self->command_names().":\n ";
+		print join "\n ", sort keys %{$self->get_templates()};
 		print "\n";
 		return;
 	}
