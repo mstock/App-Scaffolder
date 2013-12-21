@@ -11,6 +11,7 @@ use App::Cmd::Setup -command;
 use File::HomeDir;
 use File::ShareDir;
 use Path::Class::Dir;
+use MRO::Compat;
 
 use App::Scaffolder::Template;
 
@@ -29,11 +30,20 @@ sub opt_spec {
 	my ($class, $app) = @_;
 	return (
 		[ 'list|l'       => 'List the available templates' ],
-		[ 'template|t=s' => 'Name of the template that should be used', { required => 1 } ],
+		[ 'template|t=s' => 'Name of the template that should be used' ],
 		[ 'target=s'     => 'Target directory where output should go - '
 			. 'defaults to current directory, but commands may override this' ],
 		$class->get_options($app),
 	)
+}
+
+sub validate_args {
+	my ($self, $opt, $args) = @_;
+
+	$self->next::method($opt, $args);
+	unless ($opt->list() || $opt->template()) {
+		$self->usage_error("Parameter 'template' required");
+	}
 }
 
 
