@@ -1,6 +1,6 @@
 package App::Scaffolder;
 
-# ABSTRACT: Application for scaffoldind using templates
+# ABSTRACT: Application for scaffolding using templates
 
 use App::Cmd::Setup -app;
 
