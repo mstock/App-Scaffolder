@@ -30,7 +30,7 @@ use App::Scaffolder::Template;
 
 App::Scaffolder::Command is a base class for L<App::Scaffolder|App::Scaffolder>
 commands. Among other things, it provides access to the templates that belong to
-a the command and provides the C<execute> method which handles some basic
+the command and provides the C<execute> method which handles some basic
 parameters like C<--list> and also evaluates the selected template.
 
 =cut
@@ -193,7 +193,8 @@ Name of the template.
 
 =head3 Result
 
-The L<App::Scaffolder::Template|App::Scaffolder::Template> with the given name.
+The L<App::Scaffolder::Template|App::Scaffolder::Template> with the given name
+if it exists, an exception otherwise.
 
 =cut
 
