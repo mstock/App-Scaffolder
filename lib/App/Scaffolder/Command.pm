@@ -54,6 +54,7 @@ sub validate_args {
 	unless ($self->contains_base_args($opt) || $opt->template()) {
 		$self->usage_error("Parameter 'template' required");
 	}
+	return;
 }
 
 

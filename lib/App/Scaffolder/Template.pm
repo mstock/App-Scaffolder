@@ -75,7 +75,7 @@ sub new {
 	my ($class, $arg_ref) = @_;
 
 	my $name = $arg_ref->{name};
-	unless (defined $name && $name ne '') {
+	if (! defined $name || $name eq '') {
 		croak("Required 'name' parameter not passed");
 	}
 
@@ -192,7 +192,7 @@ sub process {
 		}
 
 		my $content = '';
-		if ($file->{source} =~ m{\.tt$}) {
+		if ($file->{source} =~ m{\.tt$}x) {
 			require Template;
 			my $template = Template->new({
 				ABSOLUTE => 1,
@@ -233,8 +233,8 @@ sub get_template_files {
 			unless ($child->is_dir()) {
 				my $rel_path = $child->relative($path_entry);
 				my $key = $rel_path->stringify();
-				if ($key =~ s{\.tt$}{}) {
-					my ($filename) = $rel_path->basename() =~ m{(.*)\.tt};
+				if ($key =~ s{\.tt$}{}x) {
+					my ($filename) = $rel_path->basename() =~ m{(.*)\.tt}x;
 					$rel_path = $rel_path->parent()->file($filename)->cleanup();
 				}
 				unless (exists $file->{$key}) {
