@@ -15,6 +15,31 @@ App::Scaffolder is the entry point for the application. It uses
 L<App::Cmd|App::Cmd> to provide the actual commands. See
 L<App::Scaffolder::Command|App::Scaffolder::Command> for a command base class.
 
+=head1 COMMANDS
+
+C<App-Scaffolder> itself provides only a small framework for actual commands. In
+order to provide a new command, the following is necessary:
+
+=over
+
+=item *
+
+A command below the C<App::Scaffolder::Command> namespace that extends
+L<App::Scaffolder::Command|App::Scaffolder::Command>, for example something like
+C<App::Scaffolder::Command::mycommand>.
+
+=item *
+
+Templates that are installed for L<File::ShareDir|File::ShareDir>, in the
+directory that belongs to the distribution. Inside this directory, the following
+structure is required:
+
+	<Command name>
+	`-- <Template name>
+		`-- <Template files>
+
+=back
+
 =head1 TEMPLATES
 
 The templates (which are actually directory trees containing files and
