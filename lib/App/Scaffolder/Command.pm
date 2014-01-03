@@ -29,7 +29,7 @@ commands.
 sub opt_spec {
 	my ($class, $app) = @_;
 	return (
-		[ 'list|l'       => 'List the available templates' ],
+		[ 'list|l'       => 'List the search path and the available templates' ],
 		[ 'template|t=s' => 'Name of the template that should be used' ],
 		[ 'target=s'     => 'Target directory where output should go - '
 			. 'defaults to current directory, but commands may override this' ],
@@ -237,7 +237,9 @@ sub execute {
 	my ($self, $opt, $args) = @_;
 
 	if ($opt->list()) {
-		print "Available templates for ".$self->command_names().":\n ";
+		print "Template search path for ".$self->command_names().":\n ";
+		print join "\n ", $self->get_template_dirs();
+		print "\nAvailable templates for ".$self->command_names().":\n ";
 		print join "\n ", sort keys %{$self->get_templates()};
 		print "\n";
 		return;
