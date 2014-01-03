@@ -29,10 +29,11 @@ commands.
 sub opt_spec {
 	my ($class, $app) = @_;
 	return (
-		[ 'list|l'       => 'List the search path and the available templates' ],
-		[ 'template|t=s' => 'Name of the template that should be used' ],
-		[ 'target=s'     => 'Target directory where output should go - '
+		[ 'list|l'              => 'List the search path and the available templates' ],
+		[ 'template|t=s'        => 'Name of the template that should be used' ],
+		[ 'target=s'            => 'Target directory where output should go - '
 			. 'defaults to current directory, but commands may override this' ],
+		[ 'create-template-dir' => 'Create directory for custom user templates' ],
 		$class->get_options($app),
 	)
 }
@@ -41,11 +42,27 @@ sub validate_args {
 	my ($self, $opt, $args) = @_;
 
 	$self->next::method($opt, $args);
-	unless ($opt->list() || $opt->template()) {
+	unless ($self->contains_base_args($opt) || $opt->template()) {
 		$self->usage_error("Parameter 'template' required");
 	}
 }
 
+
+=head2 contains_base_args
+
+Check if options contain a base argument like C<--list> or
+C<--create-template-dir>.
+
+=head3 Result
+
+True if yes, false otherwise.
+
+=cut
+
+sub contains_base_args {
+	my ($self, $opt) = @_;
+	return $opt->list() || $opt->create_template_dir();
+}
 
 =head2 get_options
 
@@ -80,11 +97,9 @@ sub get_template_dirs {
 
 	my @dirs;
 	my $command_name = $self->command_names();
-	if (my $my_dist_data = File::HomeDir->my_dist_data($self->get_dist_name())) {
-		my $my_command_dir = Path::Class::Dir->new($my_dist_data)->subdir($command_name);
-		if (-d $my_command_dir) {
-			push @dirs, $my_command_dir;
-		}
+	my $user_template_dir = $self->_get_user_template_dir($command_name);
+	if ($user_template_dir) {
+		push @dirs, $user_template_dir;
 	}
 	my $command_dir = Path::Class::Dir->new(
 		File::ShareDir::dist_dir($self->get_dist_name())
@@ -94,6 +109,26 @@ sub get_template_dirs {
 	}
 
 	return @dirs;
+}
+
+sub _get_user_template_dir {
+	my ($self, $command, $create) = @_;
+	my $my_dist_data = File::HomeDir->my_dist_data(
+		$self->get_dist_name(),
+		$create ? { create => 1} : ()
+	);
+	if ($my_dist_data) {
+		my $my_command_dir = Path::Class::Dir->new($my_dist_data)->subdir($command);
+		if (-d $my_command_dir) {
+			return $my_command_dir;
+		}
+		elsif ($create) {
+			$my_command_dir->mkpath()
+				or confess("Unable to create template dir $my_command_dir");
+			return $my_command_dir
+		}
+	}
+	return;
 }
 
 
@@ -241,6 +276,14 @@ sub execute {
 		print join "\n ", $self->get_template_dirs();
 		print "\nAvailable templates for ".$self->command_names().":\n ";
 		print join "\n ", sort keys %{$self->get_templates()};
+		print "\n";
+		return;
+	}
+	if ($opt->create_template_dir()) {
+		$self->_get_user_template_dir($self->command_names(), 1);
+		print "Template search path after creating template dir for "
+			.$self->command_names().":\n ";
+		print join "\n ", $self->get_template_dirs();
 		print "\n";
 		return;
 	}
