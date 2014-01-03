@@ -3,9 +3,40 @@
 package
 	scaffolder;
 
-# ABSTRACT: Application for scaffoldind using templates
+# ABSTRACT: Application for scaffolding using templates
 
 use strict;
 use warnings;
 use App::Scaffolder;
 App::Scaffolder->run();
+
+=head1 SYNOPSIS
+
+	# List available commands:
+	$ scaffolder
+
+	# Display help for the given command:
+	$ scaffolder help <command>
+
+=head1 DESCRIPTION
+
+The C<scaffolder> application is an L<App::Cmd|App::Cmd>-based program to create
+skeletons. However, the main C<App-Scaffolder>-distribution contains no actual
+commands, it merely provides a small framework to actually implement commands
+that create such skeletons.
+
+=head1 SEE ALSO
+
+=over
+
+=item *
+
+L<App::Scaffolder|App::Scaffolder>
+
+=item *
+
+L<App::Scaffolder::Command|App::Scaffolder::Command>
+
+=back
+
+=cut

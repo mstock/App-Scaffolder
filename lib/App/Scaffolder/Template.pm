@@ -27,7 +27,23 @@ App::Scaffolder::Template represents a template. A template consists of one or
 more directories containing files that should be copied to a target directory
 when processing it. If a file has a C<.tt> extension, it will be passed through
 L<Template|Template> before it is written to a target file without the C<.tt>
-suffix.
+suffix. Thus the template
+
+	foo
+	|-- subdir
+	|   |-- template.txt.tt
+	|   `-- sub.txt
+	|-- top-template.txt.tt
+	`-- bar.txt
+
+would result in the following structure after processing:
+
+	output
+	|-- subdir
+	|   |-- template.txt
+	|   `-- sub.txt
+	|-- top-template.txt
+	`-- bar.txt
 
 =head1 METHODS
 
@@ -48,7 +64,8 @@ Name of the template.
 =item path
 
 Search path for files that belong to the template. If more than one file has
-the same relative path, only the first one will be used.
+the same relative path, only the first one will be used, so it is possible to
+override files that come 'later' in the search path.
 
 =back
 

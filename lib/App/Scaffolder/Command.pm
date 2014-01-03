@@ -17,12 +17,21 @@ use App::Scaffolder::Template;
 
 =head1 SYNOPSIS
 
+	package App::Scaffolder::Command::mycommand;
 	use parent qw(App::Scaffolder::Command);
+
+	sub get_dist_name {
+		return 'App-Scaffolder-MyDist';
+	}
+
+	1;
 
 =head1 DESCRIPTION
 
 App::Scaffolder::Command is a base class for L<App::Scaffolder|App::Scaffolder>
-commands.
+commands. Among other things, it provides access to the templates that belong to
+a the command and provides the C<execute> method which handles some basic
+parameters like C<--list> and also evaluates the selected template.
 
 =cut
 
@@ -260,7 +269,7 @@ sub get_dist_name {
 
 =head2 execute
 
-Execute the command.
+Execute the command using the given command line options.
 
 =head3 Result
 
