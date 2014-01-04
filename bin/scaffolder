@@ -18,6 +18,9 @@ App::Scaffolder->run();
 	# Display help for the given command:
 	$ scaffolder help <command>
 
+	# Create scaffold
+	$ scaffolder <command> --template mytemplate ...
+
 =head1 DESCRIPTION
 
 The C<scaffolder> application is an L<App::Cmd|App::Cmd>-based program to create
