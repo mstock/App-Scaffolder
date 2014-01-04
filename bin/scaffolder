@@ -18,7 +18,7 @@ App::Scaffolder->run();
 	# Display help for the given command:
 	$ scaffolder help <command>
 
-	# Create scaffold
+	# Create scaffold:
 	$ scaffolder <command> --template mytemplate ...
 
 =head1 DESCRIPTION
