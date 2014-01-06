@@ -95,7 +95,9 @@ sub get_options {
 
 Getter for the directories where templates are searched. Uses
 L<File::HomeDir|File::HomeDir> and L<File::ShareDir|File::ShareDir> using the
-distribution name and appends the command name to the directory.
+distribution name and appends the command name to the directory. If
+C<get_extra_template_dirs> returns a non-empty list, this will be put between
+these two default directories.
 
 =head3 Result
 
@@ -143,6 +145,32 @@ sub _get_user_template_dir {
 	return;
 }
 
+
+=head2 get_extra_template_dirs
+
+Method to insert additional template directories between the 'local',
+L<File::HomeDir|File::HomeDir>-based directory and the 'global',
+L<File::ShareDir|File::ShareDir>-based one into the search path. By default,
+this takes the directories from the C<SCAFFOLDER_TEMPLATE_PATH> environment
+variable.
+
+=head3 Parameters
+
+This method expects positional parameters.
+
+=over
+
+=item command
+
+Name of the command template directories should be returned for.
+
+=back
+
+=head3 Result
+
+A potentially empty list with the additional directories.
+
+=cut
 
 sub get_extra_template_dirs {
 	my ($self, $command) = @_;

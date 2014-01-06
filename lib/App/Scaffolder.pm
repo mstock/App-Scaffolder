@@ -45,7 +45,7 @@ structure is required:
 The templates (which are actually directory trees containing files and
 L<Template|Template> templates) are handled by
 L<App::Scaffolder::Template|App::Scaffolder::Template>. The search path for the
-templates is constructed using L<File::HomeDir|File::HomeDir> and
+templates is usually constructed using L<File::HomeDir|File::HomeDir> and
 L<File::ShareDir|File::ShareDir>, so one may override existing templates or add
 new templates by putting them in the directory returned by
 
@@ -57,8 +57,19 @@ this path would look something like the following:
 
 	$HOME/.local/share/Perl/dist/App-Scaffolder-MyDist/mycommand
 
+In addition to this, the L<App::Scaffolder::Command|App::Scaffolder::Command>
+base class also uses the C<SCAFFOLDER_TEMPLATE_PATH> environment variable to add
+additional directories to the search path. Thus setting
+
+	export SCAFFOLDER_TEMPLATE_PATH=~/scaffolder_templates
+
+and putting a directory called C<mycommand> below C<~/scaffolder_templates> which
+contains templates would also make them available to C<scaffolder mycommand>. This
+could be useful to share templates with other users if the templates are stored
+in a location that is accessible to the other users, too.
+
 The L<App::Scaffolder::Command|App::Scaffolder::Command> command base class also
-provides two parameters related to this:
+provides two parameters related to the template search path:
 
 =over
 
