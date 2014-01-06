@@ -12,6 +12,7 @@ use File::HomeDir;
 use File::ShareDir;
 use Path::Class::Dir;
 use MRO::Compat;
+use Perl::OSType qw(is_os_type);
 
 use App::Scaffolder::Template;
 
@@ -111,6 +112,7 @@ sub get_template_dirs {
 	if ($user_template_dir) {
 		push @dirs, $user_template_dir;
 	}
+	push @dirs, $self->get_extra_template_dirs($command_name);
 	my $command_dir = Path::Class::Dir->new(
 		File::ShareDir::dist_dir($self->get_dist_name())
 	)->subdir($command_name);
@@ -139,6 +141,21 @@ sub _get_user_template_dir {
 		}
 	}
 	return;
+}
+
+
+sub get_extra_template_dirs {
+	my ($self, $command) = @_;
+
+	my $scaffolder_template_path = $ENV{SCAFFOLDER_TEMPLATE_PATH};
+	my @extra_template_dirs;
+	if (defined $scaffolder_template_path && $scaffolder_template_path ne '') {
+		push @extra_template_dirs, grep { -d $_ } map {
+			Path::Class::Dir->new($_)->subdir($command)
+		} split((is_os_type('Unix') ? qr{:}x : qr{;}x), $scaffolder_template_path);
+	}
+
+	return @extra_template_dirs;
 }
 
 
