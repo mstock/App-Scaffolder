@@ -12,7 +12,7 @@ use File::HomeDir;
 use File::ShareDir;
 use Path::Class::Dir;
 use MRO::Compat;
-use Perl::OSType qw(is_os_type);
+use Config;
 
 use App::Scaffolder::Template;
 
@@ -180,7 +180,7 @@ sub get_extra_template_dirs {
 	if (defined $scaffolder_template_path && $scaffolder_template_path ne '') {
 		push @extra_template_dirs, grep { -d $_ } map {
 			Path::Class::Dir->new($_)->subdir($command)
-		} split((is_os_type('Unix') ? qr{:}x : qr{;}x), $scaffolder_template_path);
+		} split(/$Config::Config{path_sep}/x, $scaffolder_template_path);
 	}
 
 	return @extra_template_dirs;

@@ -13,7 +13,7 @@ use Test::File::ShareDir '-share' => {
 	'-dist' => { 'App-Scaffolder' => Path::Class::Dir->new(qw(t testdata)) }
 };
 use File::ShareDir;
-use Perl::OSType qw(is_os_type);
+use Config;
 
 use App::Scaffolder::Command;
 
@@ -79,7 +79,7 @@ sub get_extra_template_dirs_test : Test(5) {
 	is_deeply($template_dirs[0], $extra_dir0->subdir('dummy'));
 
 	$ENV{SCAFFOLDER_TEMPLATE_PATH} = $extra_dir0->stringify()
-		. (is_os_type('Unix') ? ':' : ';')
+		. $Config::Config{path_sep}
 			. $extra_dir1->stringify();
 	@template_dirs = $dummy->get_extra_template_dirs('dummy');
 	is(scalar @template_dirs, 2, 'two directories found');
