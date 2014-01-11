@@ -14,7 +14,7 @@ use Test::File::ShareDir '-share' => {
 };
 use File::ShareDir;
 use Config;
-
+use Test::Exception;
 use App::Scaffolder::Command;
 
 my $share_dir = Path::Class::Dir->new(File::ShareDir::dist_dir('App-Scaffolder'));
@@ -60,16 +60,22 @@ sub get_templates_test : Test(3) {
 }
 
 
-sub get_template_test : Test(1) {
+sub get_template_test : Test(2) {
 	my ($self) = @_;
 
 	my $dummy = App::Scaffolder::Command::dummy->new({});
 	my $template = $dummy->get_template('template');
 	is($template->get_name(), 'template', 'name ok');
+
+	throws_ok(
+		sub { $dummy->get_template() },
+		qr{Required 'name' parameter not passed or empty},
+		'name parameter required'
+	);
 }
 
 
-sub get_extra_template_dirs_test : Test(5) {
+sub get_extra_template_dirs_test : Test(6) {
 	my ($self) = @_;
 
 	local $ENV{SCAFFOLDER_TEMPLATE_PATH} = $extra_dir0->stringify();
@@ -85,6 +91,12 @@ sub get_extra_template_dirs_test : Test(5) {
 	is(scalar @template_dirs, 2, 'two directories found');
 	is_deeply($template_dirs[0], $extra_dir0->subdir('dummy'));
 	is_deeply($template_dirs[1], $extra_dir1->subdir('dummy'));
+
+	throws_ok(
+		sub { $dummy->get_extra_template_dirs() },
+		qr{Required 'command' parameter not passed or empty},
+		'command parameter required'
+	);
 }
 
 

@@ -175,6 +175,10 @@ A potentially empty list with the additional directories.
 sub get_extra_template_dirs {
 	my ($self, $command) = @_;
 
+	if (! defined $command || $command eq '') {
+		croak("Required 'command' parameter not passed or empty");
+	}
+
 	my $scaffolder_template_path = $ENV{SCAFFOLDER_TEMPLATE_PATH};
 	my @extra_template_dirs;
 	if (defined $scaffolder_template_path && $scaffolder_template_path ne '') {
@@ -246,6 +250,11 @@ if it exists, an exception otherwise.
 
 sub get_template {
 	my ($self, $name) = @_;
+
+	if (! defined $name || $name eq '') {
+		croak("Required 'name' parameter not passed or empty");
+	}
+
 	my $template = $self->get_templates();
 	unless (exists $template->{$name}) {
 		croak("No template called '$name' found");
