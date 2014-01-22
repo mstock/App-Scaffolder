@@ -226,7 +226,7 @@ A hash reference containing hash references with information about the files.
 
 sub get_template_files {
 	my ($self) = @_;
-	my $file;
+	my $file = {};
 	for my $path_entry (map {$_->absolute()} @{$self->get_path()}) {
 		$path_entry->recurse(callback => sub {
 			my ($child) = @_;
