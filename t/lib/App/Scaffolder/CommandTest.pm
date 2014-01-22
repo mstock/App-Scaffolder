@@ -16,6 +16,7 @@ use File::ShareDir;
 use Config;
 use Test::Exception;
 use App::Scaffolder::Command;
+use App::Scaffolder::Command::dummy;
 
 my $share_dir = Path::Class::Dir->new(File::ShareDir::dist_dir('App-Scaffolder'));
 my $extra_dir0 = Path::Class::Dir->new(qw(t testdata extra_templates0))->absolute();
@@ -99,15 +100,5 @@ sub get_extra_template_dirs_test : Test(6) {
 	);
 }
 
-
-package App::Scaffolder::Command::dummy;
-use parent qw(App::Scaffolder::Command);
-
-use strict;
-use warnings;
-
-sub get_dist_name {
-	return 'App-Scaffolder';
-}
 
 1;
