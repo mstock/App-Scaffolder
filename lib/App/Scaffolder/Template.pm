@@ -21,6 +21,12 @@ use Path::Class::File;
 			Path::Class::Dir->new('/second/path/belonging/to/template'),
 		]
 	});
+	my @files = $template->process({
+		target    => Path::Class::Dir->new('target', 'directory'),
+		variables => {
+			variable_value => 'a variable value',
+		}
+	});
 
 =head1 DESCRIPTION
 
@@ -45,6 +51,19 @@ would result in the following structure after processing:
 	|   `-- sub.txt
 	|-- top-template.txt
 	`-- bar.txt
+
+The path of a file in the template may also contain variables, which are
+delimited by C<___> and replaced with values from the C<variables> passed to
+C<process>:
+
+	# Template file path:
+	___dir___/___name___.txt
+
+	# Given $variables = { dir => 'directory', name => 'some_name' }, the
+	# following file will be created in the target directory:
+	directory/some_name.txt
+
+This can be useful if parts of the output file path are not constant.
 
 =head1 METHODS
 
@@ -218,6 +237,33 @@ sub process {
 	return @created_files;
 }
 
+
+=head2 replace_file_path_variables
+
+Replace parts inside a L<Path::Class::File|Path::Class::File>-based path that
+match C<___E<lt>nameE<gt>___> with a value from a hash.
+
+=head3 Parameters
+
+This method expects positional parameters.
+
+=over
+
+=item path
+
+Path to the file which may contain placeholders.
+
+=item variables
+
+Hash reference with values that should replace the placeholders.
+
+=back
+
+=head3 Result
+
+The processed file path.
+
+=cut
 
 sub replace_file_path_variables {
 	my ($self, $path, $variables) = @_;
