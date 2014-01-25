@@ -7,6 +7,7 @@ use warnings;
 
 use Carp;
 use Scalar::Util qw(blessed);
+use Path::Class::File;
 
 =head1 SYNOPSIS
 
@@ -185,7 +186,11 @@ sub process {
 
 	my @created_files;
 	for my $file (values %{$self->get_template_files()}) {
-		my $target_dir = $target->subdir($file->{rel_target}->parent());
+		my $rel_target = $self->replace_file_path_variables(
+			$file->{rel_target},
+			$variables
+		);
+		my $target_dir = $target->subdir($rel_target->parent());
 		unless (-d $target_dir) {
 			$target_dir->mkpath()
 				or confess("Unable to create target directory $target_dir");
@@ -204,13 +209,37 @@ sub process {
 			$content = $file->{source}->slurp();
 		}
 		my $output_file = $target_dir->file(
-			$file->{rel_target}->basename()
+			$rel_target->basename()
 		);
 		$output_file->openw()->write($content);
 		push @created_files, $output_file;
 	}
 
 	return @created_files;
+}
+
+
+sub replace_file_path_variables {
+	my ($self, $path, $variables) = @_;
+
+	unless (blessed $path && $path->isa('Path::Class::File')) {
+		croak("Required 'path' parameter not passed or not a 'Path::Class::File' instance");
+	}
+
+	if (! defined $variables || ref $variables ne 'HASH') {
+		croak("Required 'variables' parameter not passed or not a hash reference");
+	}
+
+	while ($path =~ m{___([^_/\\]+)___}x) {
+		if (defined $variables->{$1}) {
+			$path =~ s{___([^_/\\]+)___}{$variables->{$1}}gx;
+			$path = Path::Class::File->new($path);
+		}
+		else {
+			croak("Unreplaceable filename variable $1 found");
+		}
+	}
+	return $path;
 }
 
 
