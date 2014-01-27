@@ -81,7 +81,7 @@ sub get_template_files_test : Test(2) {
 }
 
 
-sub replace_file_path_variables_test : Test(8) {
+sub replace_file_path_variables_test : Test(11) {
 	my ($self) = @_;
 
 	my $template = App::Scaffolder::Template->new({
@@ -126,7 +126,17 @@ sub replace_file_path_variables_test : Test(8) {
 
 	$file = Path::Class::File->new('___dir1______dir2___/___name1___.txt');
 	$result = $template->replace_file_path_variables($file, $variables);
-	is($result, Path::Class::File->new('dir1dir2/testname1.txt'), 'dir not replaced');
+	is($result, Path::Class::File->new('dir1dir2/testname1.txt'), 'dirs replaced');
+
+	my @candidates = qw(___dir___/file dir/___dir___/file dir/___file___);
+	for my $file (map { Path::Class::File->new($_) } @candidates) {
+		throws_ok(sub {
+			$result = $template->replace_file_path_variables($file, {
+				dir  => '..',
+				file => '..',
+			});
+		}, qr{Potential directory traversal detected}, 'directory traversal avoided');
+	}
 }
 
 
@@ -164,7 +174,7 @@ sub process_test : Test(4) {
 }
 
 
-sub process_with_path_variables_test : Test(6) {
+sub process_with_path_variables_test : Test(7) {
 	my ($self) = @_;
 
 	my $template = App::Scaffolder::Template->new({
@@ -195,6 +205,17 @@ sub process_with_path_variables_test : Test(6) {
 	is($basedir->file('directory', 'directory2', 'testname')->slurp(), "testname\n", 'content ok');
 	is($basedir->file('directory', 'file.txt')->slurp(), "directory\n", 'content ok');
 	is($basedir->file('testname')->slurp(), "content\n", 'content ok'),
+
+	throws_ok(sub {
+		$template->process({
+			target    => $basedir,
+			variables => {
+				dir  => '..',
+				dir2 => '..',
+				name => 'testname',
+			}
+		})
+	}, qr{Potential directory traversal detected}, 'directory traversal avoided');
 }
 
 

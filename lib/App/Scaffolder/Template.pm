@@ -8,6 +8,7 @@ use warnings;
 use Carp;
 use Scalar::Util qw(blessed);
 use Path::Class::File;
+use File::Spec;
 
 =head1 SYNOPSIS
 
@@ -284,6 +285,10 @@ sub replace_file_path_variables {
 		else {
 			croak("Unreplaceable filename variable $1 found");
 		}
+	}
+	my @parts = File::Spec->splitdir($path);
+	if (scalar @parts > scalar File::Spec->no_upwards(@parts)) {
+		croak("Potential directory traversal detected in path '$path'");
 	}
 	return $path;
 }
