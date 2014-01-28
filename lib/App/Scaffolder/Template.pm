@@ -277,6 +277,9 @@ sub replace_file_path_variables {
 		croak("Required 'variables' parameter not passed or not a hash reference");
 	}
 
+	my $orig_path = $path;
+	my @orig_parts = File::Spec->splitdir($orig_path);
+
 	while ($path =~ m{___([^_/\\]+)___}x) {
 		if (defined $variables->{$1}) {
 			$path =~ s{___([^_/\\]+)___}{$variables->{$1}}gx;
@@ -287,7 +290,8 @@ sub replace_file_path_variables {
 		}
 	}
 	my @parts = File::Spec->splitdir($path);
-	if (scalar @parts > scalar File::Spec->no_upwards(@parts)) {
+	if (scalar @parts > scalar File::Spec->no_upwards(@parts)
+			|| scalar @parts < scalar @orig_parts) {
 		croak("Potential directory traversal detected in path '$path'");
 	}
 	return $path;
