@@ -266,7 +266,7 @@ sub no_overwrite_without_force_test : Test(6) {
 		sub {
 			$template->process($process_params);
 		},
-		qr{File $files[0] exists - need to pass 'overwrite' parameter to overwrite files},
+		qr{File .+foo\.txt exists - need to pass 'overwrite' parameter to overwrite files},
 		'overwrite not performed'
 	);
 	is($files[0]->slurp(), "initial value\n", 'content not overwritten');
