@@ -207,6 +207,8 @@ sub process_with_path_variables_test : Test(7) {
 	is($basedir->file('directory', 'file.txt')->slurp(), "directory\n", 'content ok');
 	is($basedir->file('testname')->slurp(), "content\n", 'content ok'),
 
+	$scratch = Directory::Scratch->new();
+	$basedir = $scratch->base();
 	throws_ok(sub {
 		$template->process({
 			target    => $basedir,
