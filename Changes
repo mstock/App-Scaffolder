@@ -2,6 +2,13 @@ Revision history for App-Scaffolder
 
 {{$NEXT}}
 
+ - Add --quiet option which prevents the new list of written files from being
+   printed
+ - Add --overwrite option which forces overwriting of existing files which is
+   prevented by default now
+ - Add support for simple variables in file names
+ - Try to fix some CPAN testers test failures
+
 0.001000  2014-01-18 16:18:46 Europe/Zurich
 
  - Initial release
