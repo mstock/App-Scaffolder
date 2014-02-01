@@ -1,6 +1,6 @@
 package App::Scaffolder::Template;
 {
-  $App::Scaffolder::Template::VERSION = '0.001000';
+  $App::Scaffolder::Template::VERSION = '0.002000';
 }
 
 # ABSTRACT: Represent a template for App::Scaffolder
@@ -10,6 +10,8 @@ use warnings;
 
 use Carp;
 use Scalar::Util qw(blessed);
+use Path::Class::File;
+use File::Spec;
 
 
 sub new {
@@ -78,28 +80,28 @@ sub process {
 
 	my @created_files;
 	for my $file (values %{$self->get_template_files()}) {
-		my $target_dir = $target->subdir($file->{rel_target}->parent());
+		my $rel_target = $self->replace_file_path_variables(
+			$file->{rel_target},
+			$variables
+		);
+		my $target_dir = $target->subdir($rel_target->parent());
 		unless (-d $target_dir) {
 			$target_dir->mkpath()
 				or confess("Unable to create target directory $target_dir");
 		}
 
-		my $content = '';
-		if ($file->{source} =~ m{\.tt$}x) {
-			require Template;
-			my $template = Template->new({
-				ABSOLUTE => 1,
-			});
-			$template->process($file->{source}->stringify(), $variables, \$content)
-				or confess $template->error();
-		}
-		else {
-			$content = $file->{source}->slurp();
-		}
 		my $output_file = $target_dir->file(
-			$file->{rel_target}->basename()
+			$rel_target->basename()
 		);
-		$output_file->openw()->write($content);
+		if (-e $output_file && ! $arg_ref->{overwrite}) {
+			croak(
+				"File " . $output_file . " exists - need to pass 'overwrite' "
+					. "parameter to overwrite files"
+			);
+		}
+		$output_file->openw()->write($self->get_content_for(
+			$file->{source}, $variables
+		));
 		push @created_files, $output_file;
 	}
 
@@ -108,9 +110,67 @@ sub process {
 
 
 
+sub get_content_for {
+	my ($self, $file, $variables) = @_;
+
+	unless (blessed $file && $file->isa('Path::Class::File')) {
+		croak("Required 'file' parameter not passed or not a 'Path::Class::File' instance");
+	}
+	$variables ||= {};
+
+	my $content = '';
+	if ($file =~ m{\.tt$}x) {
+		require Template;
+		my $template = Template->new({
+			ABSOLUTE => 1,
+		});
+		$template->process($file->stringify(), $variables, \$content)
+			or confess $template->error();
+	}
+	else {
+		$content = $file->slurp();
+	}
+	return $content;
+}
+
+
+
+sub replace_file_path_variables {
+	my ($self, $path, $variables) = @_;
+
+	unless (blessed $path && $path->isa('Path::Class::File')) {
+		croak("Required 'path' parameter not passed or not a 'Path::Class::File' instance");
+	}
+
+	if (! defined $variables || ref $variables ne 'HASH') {
+		croak("Required 'variables' parameter not passed or not a hash reference");
+	}
+
+	my $orig_path = $path;
+	my @orig_parts = File::Spec->splitdir($orig_path);
+
+	while ($path =~ m{___([^_/\\]+)___}x) {
+		if (defined $variables->{$1}) {
+			$path =~ s{___([^_/\\]+)___}{$variables->{$1}}gx;
+			$path = Path::Class::File->new($path);
+		}
+		else {
+			croak("Unreplaceable filename variable $1 found");
+		}
+	}
+	my @parts = File::Spec->splitdir($path);
+	if (scalar @parts > scalar File::Spec->no_upwards(@parts)
+			|| scalar @parts < scalar @orig_parts) {
+		croak("Potential directory traversal detected in path '$path'");
+	}
+	return $path;
+}
+
+
+
 sub get_template_files {
 	my ($self) = @_;
-	my $file;
+	my $file = {};
 	for my $path_entry (map {$_->absolute()} @{$self->get_path()}) {
 		$path_entry->recurse(callback => sub {
 			my ($child) = @_;
@@ -145,7 +205,7 @@ App::Scaffolder::Template - Represent a template for App::Scaffolder
 
 =head1 VERSION
 
-version 0.001000
+version 0.002000
 
 =head1 SYNOPSIS
 
@@ -158,6 +218,12 @@ version 0.001000
 			Path::Class::Dir->new('/first/path/belonging/to/template'),
 			Path::Class::Dir->new('/second/path/belonging/to/template'),
 		]
+	});
+	my @files = $template->process({
+		target    => Path::Class::Dir->new('target', 'directory'),
+		variables => {
+			variable_value => 'a variable value',
+		}
 	});
 
 =head1 DESCRIPTION
@@ -183,6 +249,19 @@ would result in the following structure after processing:
 	|   `-- sub.txt
 	|-- top-template.txt
 	`-- bar.txt
+
+The path of a file in the template may also contain variables, which are
+delimited by C<___> and replaced with values from the C<variables> passed to
+C<process>:
+
+	# Template file path:
+	___dir___/___name___.txt
+
+	# Given $variables = { dir => 'directory', name => 'some_name' }, the
+	# following file will be created in the target directory:
+	directory/some_name.txt
+
+This can be useful if parts of the output file path are not constant.
 
 =head1 METHODS
 
@@ -246,11 +325,66 @@ Target directory where the output should be stored.
 
 Hash reference with variables that should be made available to templates.
 
+=item overwrite
+
+By default, existing files will not be overwritten. Passing a truthy value for
+the C<overwrite> parameter changes this.
+
 =back
 
 =head3 Result
 
 A list with the created files on succes, an exception otherwise.
+
+=head2 get_content_for
+
+Given a file from the template and some template variables, read and potentially
+process the file and return the content the resulting file should have.
+
+=head3 Parameters
+
+This method expects positional parameters.
+
+=over
+
+=item file
+
+Input file from the template.
+
+=item variables
+
+Variables that should be made available to the template.
+
+=back
+
+=head3 Result
+
+The content for the corresponding target file.
+
+=head2 replace_file_path_variables
+
+Replace parts inside a L<Path::Class::File|Path::Class::File>-based path that
+match C<___E<lt>nameE<gt>___> with a value from a hash.
+
+=head3 Parameters
+
+This method expects positional parameters.
+
+=over
+
+=item path
+
+Path to the file which may contain placeholders.
+
+=item variables
+
+Hash reference with values that should replace the placeholders.
+
+=back
+
+=head3 Result
+
+The processed file path.
 
 =head2 get_template_files
 

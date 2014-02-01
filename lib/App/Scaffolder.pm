@@ -1,6 +1,6 @@
 package App::Scaffolder;
 {
-  $App::Scaffolder::VERSION = '0.001000';
+  $App::Scaffolder::VERSION = '0.002000';
 }
 
 # ABSTRACT: Application for scaffolding using templates
@@ -20,7 +20,7 @@ App::Scaffolder - Application for scaffolding using templates
 
 =head1 VERSION
 
-version 0.001000
+version 0.002000
 
 =head1 SYNOPSIS
 

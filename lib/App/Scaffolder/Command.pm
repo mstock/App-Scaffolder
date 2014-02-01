@@ -1,6 +1,6 @@
 package App::Scaffolder::Command;
 {
-  $App::Scaffolder::Command::VERSION = '0.001000';
+  $App::Scaffolder::Command::VERSION = '0.002000';
 }
 
 # ABSTRACT: Base class for App::Scaffolder commands
@@ -28,6 +28,9 @@ sub opt_spec {
 		[ 'target=s'            => 'Target directory where output should go - '
 			. 'defaults to current directory, but commands may override this' ],
 		[ 'create-template-dir' => 'Create directory for custom user templates' ],
+		[ 'overwrite'           => 'Overwrite existing files', { default => 0 }],
+		[ 'quiet'               => 'Do not print the list of created files' ],
+		[], ['Command-specific options:'],
 		$class->get_options($app),
 	)
 }
@@ -198,10 +201,14 @@ sub execute {
 		return;
 	}
 
-	$self->get_template($opt->template())->process({
+	my @files = $self->get_template($opt->template())->process({
 		target    => $self->get_target($opt),
 		variables => $self->get_variables($opt),
+		overwrite => $opt->overwrite(),
 	});
+	unless ($opt->quiet()) {
+		print join("\n", sort @files) . "\n";
+	}
 
 	return;
 }
@@ -218,7 +225,7 @@ App::Scaffolder::Command - Base class for App::Scaffolder commands
 
 =head1 VERSION
 
-version 0.001000
+version 0.002000
 
 =head1 SYNOPSIS
 
