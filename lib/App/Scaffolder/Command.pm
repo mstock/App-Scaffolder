@@ -45,6 +45,7 @@ sub opt_spec {
 			. 'defaults to current directory, but commands may override this' ],
 		[ 'create-template-dir' => 'Create directory for custom user templates' ],
 		[ 'overwrite'           => 'Overwrite existing files', { default => 0 }],
+		[], ['Command-specific options:'],
 		$class->get_options($app),
 	)
 }
