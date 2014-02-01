@@ -221,18 +221,6 @@ sub process {
 				or confess("Unable to create target directory $target_dir");
 		}
 
-		my $content = '';
-		if ($file->{source} =~ m{\.tt$}x) {
-			require Template;
-			my $template = Template->new({
-				ABSOLUTE => 1,
-			});
-			$template->process($file->{source}->stringify(), $variables, \$content)
-				or confess $template->error();
-		}
-		else {
-			$content = $file->{source}->slurp();
-		}
 		my $output_file = $target_dir->file(
 			$rel_target->basename()
 		);
@@ -242,11 +230,64 @@ sub process {
 					. "parameter to overwrite files"
 			);
 		}
-		$output_file->openw()->write($content);
+		$output_file->openw()->write($self->get_content_for(
+			$file->{source}, $variables
+		));
 		push @created_files, $output_file;
 	}
 
 	return @created_files;
+}
+
+
+=head2 get_content_for
+
+Given a file from the template and some template variables, read and potentially
+process the file and return the content the resulting file should have.
+
+=head3 Parameters
+
+This method expects positional parameters.
+
+=over
+
+=item file
+
+Input file from the template.
+
+=item variables
+
+Variables that should be made available to the template.
+
+=back
+
+=head3 Result
+
+The content for the corresponding target file.
+
+=cut
+
+sub get_content_for {
+	my ($self, $file, $variables) = @_;
+
+	unless (blessed $file && $file->isa('Path::Class::File')) {
+		croak("Required 'file' parameter not passed or not a 'Path::Class::File' instance");
+	}
+	$variables ||= {};
+
+	my $content = '';
+	if ($file =~ m{\.tt$}x) {
+		require Template;
+		my $template = Template->new({
+			ABSOLUTE => 1,
+		});
+		$template->process($file->stringify(), $variables, \$content)
+			or confess $template->error();
+	}
+	else {
+		$content = $file->slurp();
+	}
+	return $content;
 }
 
 

@@ -220,6 +220,28 @@ sub process_with_path_variables_test : Test(7) {
 }
 
 
+sub get_content_for_test : Test(2) {
+	my ($self) = @_;
+
+	my $template = App::Scaffolder::Template->new({
+		name => 'test_template',
+		path => [$dir0],
+	});
+	is(
+		$template->get_content_for($dir0->file('foo.txt'), undef),
+		"Some static test text.\n",
+		'static content returned'
+	);
+	is(
+		$template->get_content_for($dir0->file('bar.txt.tt'), {
+			variable_value => 'testtext'}
+		),
+		"Some test text with testtext.\n",
+		'dynamic content returned'
+	);
+}
+
+
 sub no_overwrite_without_force_test : Test(6) {
 	my ($self) = @_;
 
