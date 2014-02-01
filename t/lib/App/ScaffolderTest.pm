@@ -17,18 +17,24 @@ use Test::File::ShareDir '-share' => {
 use App::Scaffolder;
 
 
-sub app_test : Test(4) {
+sub app_test : Test(5) {
 	my ($self) = @_;
 
 	my $scratch = Directory::Scratch->new();
 	my $result = test_app('App::Scaffolder' => [
 		qw(dummy --template template --target), $scratch->base()
 	]);
-	is($result->stdout(), '', 'no output');
+	like($result->stdout(), qr{.+content.txt}, 'no output');
 	is($result->error(), undef, 'threw no exceptions');
 	my $file = $scratch->base()->file('content.txt');
 	file_exists_ok($file, 'expected file created');
 	is($file->slurp(), "Some file.\n", 'content ok');
+
+	$scratch = Directory::Scratch->new();
+	$result = test_app('App::Scaffolder' => [
+		qw(dummy --template template --quiet --target), $scratch->base()
+	]);
+	is($result->stdout(), '', 'no output');
 }
 
 

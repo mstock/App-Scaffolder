@@ -45,6 +45,7 @@ sub opt_spec {
 			. 'defaults to current directory, but commands may override this' ],
 		[ 'create-template-dir' => 'Create directory for custom user templates' ],
 		[ 'overwrite'           => 'Overwrite existing files', { default => 0 }],
+		[ 'quiet'               => 'Do not print the list of created files' ],
 		[], ['Command-specific options:'],
 		$class->get_options($app),
 	)
@@ -355,11 +356,14 @@ sub execute {
 		return;
 	}
 
-	$self->get_template($opt->template())->process({
+	my @files = $self->get_template($opt->template())->process({
 		target    => $self->get_target($opt),
 		variables => $self->get_variables($opt),
 		overwrite => $opt->overwrite(),
 	});
+	unless ($opt->quiet()) {
+		print join("\n", sort @files) . "\n";
+	}
 
 	return;
 }
