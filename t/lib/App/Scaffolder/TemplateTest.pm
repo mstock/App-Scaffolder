@@ -16,6 +16,7 @@ use App::Scaffolder::Template;
 my $dir0 = Path::Class::Dir->new(qw(t testdata test_template))->absolute();
 my $dir1 = Path::Class::Dir->new(qw(t testdata test_template2))->absolute();
 my $dir2 = Path::Class::Dir->new(qw(t testdata test_template3))->absolute();
+my $dir3 = Path::Class::Dir->new(qw(t testdata test_template4))->absolute();
 
 sub new_test : Test(1) {
 	my ($self) = @_;
@@ -216,6 +217,44 @@ sub process_with_path_variables_test : Test(7) {
 			}
 		})
 	}, qr{Potential directory traversal detected}, 'directory traversal avoided');
+}
+
+
+sub no_overwrite_without_force_test : Test(6) {
+	my ($self) = @_;
+
+	my $template = App::Scaffolder::Template->new({
+		name => 'test_template4',
+		path => [$dir3],
+	});
+
+	my $scratch = Directory::Scratch->new();
+	my $process_params = {
+		target    => $scratch->base(),
+		variables => {
+			variable_value => 'initial value',
+		}
+	};
+
+	# Overwrite prevented
+	my @files = $template->process($process_params);
+	is(scalar @files, 1, 'one file created');
+	is($files[0]->slurp(), "initial value\n", 'content ok');
+	throws_ok(
+		sub {
+			$template->process($process_params);
+		},
+		qr{File $files[0] exists - need to pass 'overwrite' parameter to overwrite files},
+		'overwrite not performed'
+	);
+	is($files[0]->slurp(), "initial value\n", 'content not overwritten');
+
+	# Force overwrite
+	$process_params->{overwrite} = 1;
+	$process_params->{variables}->{variable_value} = 'fresh value';
+	@files = $template->process($process_params);
+	is(scalar @files, 1, 'file overwritten');
+	is($files[0]->slurp(), "fresh value\n", 'content ok');
 }
 
 

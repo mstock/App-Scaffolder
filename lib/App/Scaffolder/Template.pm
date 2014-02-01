@@ -181,6 +181,11 @@ Target directory where the output should be stored.
 
 Hash reference with variables that should be made available to templates.
 
+=item overwrite
+
+By default, existing files will not be overwritten. Passing a truthy value for
+the C<overwrite> parameter changes this.
+
 =back
 
 =head3 Result
@@ -231,6 +236,12 @@ sub process {
 		my $output_file = $target_dir->file(
 			$rel_target->basename()
 		);
+		if (-e $output_file && ! $arg_ref->{overwrite}) {
+			croak(
+				"File " . $output_file . " exists - need to pass 'overwrite' "
+					. "parameter to overwrite files"
+			);
+		}
 		$output_file->openw()->write($content);
 		push @created_files, $output_file;
 	}
