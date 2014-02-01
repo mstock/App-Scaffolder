@@ -44,6 +44,7 @@ sub opt_spec {
 		[ 'target=s'            => 'Target directory where output should go - '
 			. 'defaults to current directory, but commands may override this' ],
 		[ 'create-template-dir' => 'Create directory for custom user templates' ],
+		[ 'overwrite'           => 'Overwrite existing files', { default => 0 }],
 		$class->get_options($app),
 	)
 }
@@ -356,6 +357,7 @@ sub execute {
 	$self->get_template($opt->template())->process({
 		target    => $self->get_target($opt),
 		variables => $self->get_variables($opt),
+		overwrite => $opt->overwrite(),
 	});
 
 	return;

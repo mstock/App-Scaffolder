@@ -25,10 +25,28 @@ sub app_test : Test(4) {
 		qw(dummy --template template --target), $scratch->base()
 	]);
 	is($result->stdout(), '', 'no output');
-	is($result->error, undef, 'threw no exceptions');
+	is($result->error(), undef, 'threw no exceptions');
 	my $file = $scratch->base()->file('content.txt');
-	file_exists_ok($file);
+	file_exists_ok($file, 'expected file created');
 	is($file->slurp(), "Some file.\n", 'content ok');
+}
+
+
+sub no_overwrite_without_option_test : Test(6) {
+	my ($self) = @_;
+
+	my $scratch = Directory::Scratch->new();
+	my $options = [ qw(dummy --template template --target), $scratch->base() ];
+
+	my $result = test_app('App::Scaffolder' => $options);
+	is($result->error(), undef, 'threw no exceptions');
+
+	$result = test_app('App::Scaffolder' => $options);
+	like($result->error(), qr{File .+ exists}, 'threw exceptions');
+
+	push @{$options}, '--overwrite';
+	$result = test_app('App::Scaffolder' => $options);
+	is($result->error(), undef, 'threw no exceptions');
 }
 
 
