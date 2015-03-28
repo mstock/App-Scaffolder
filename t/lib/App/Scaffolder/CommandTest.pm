@@ -101,4 +101,18 @@ sub get_extra_template_dirs_test : Test(6) {
 }
 
 
+sub get_dist_name_test : Test(2) {
+	my ($self) = @_;
+
+	my $command = App::Scaffolder::Command->new({});
+	throws_ok(
+		sub { $command->get_dist_name() },
+		qr{get_dist_name must be implemented by scaffolder commands},
+		'get_dist_name required in command class'
+	);
+
+	my $dummy = App::Scaffolder::Command::dummy->new({});
+	is($dummy->get_dist_name(), 'App-Scaffolder', 'dummy implements it');
+}
+
 1;
