@@ -84,6 +84,54 @@ L<File::HomeDir|File::HomeDir> and print the search path.
 
 =back
 
+=head1 INSTALLATION
+
+L<App::Scaffolder|App::Scaffolder> can be installed like any other Perl
+distribution. However, some people might prefer an approach which uses as
+many packages from the operating system distribution they use as possible, and
+which does not touch anything in directories managed by the package manager. The
+following section describes an approach to achieve this that can be used on
+Debian.
+
+=head2 DEBIAN
+
+=over
+
+=item *
+
+Install runtime and test dependencies:
+
+	apt-get install libapp-cmd-perl libfile-homedir-perl libfile-sharedir-perl \
+		libmro-compat-perl libpath-class-perl libtemplate-perl libdirectory-scratch-perl \
+		libtest-class-perl libtest-exception-perl libtest-file-perl libtest-file-sharedir-perl
+
+=item *
+
+Install L<local::lib|local::lib> and L<cpanm|cpanm>:
+
+	apt-get install liblocal-lib-perl cpanminus
+
+=item *
+
+Setup L<local::lib|local::lib> in your shell by adding
+
+	eval "$(perl -Mlocal::lib)"
+
+to your C<~/.bash_profile> or C<~/.bashrc> file and restarting your shell.
+
+=item *
+
+Install L<App::Scaffolder|App::Scaffolder>:
+
+	cpanm App::Scaffolder
+
+=back
+
+The C<scaffolder> command should be in your C<$PATH> now and if you run it, it
+will show a short help and the available commands (which are provided by other
+distributions below the C<App::Scaffolder> namespace, so by default, the list
+will be empty).
+
 =cut
 
 1;
