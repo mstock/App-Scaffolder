@@ -1,6 +1,5 @@
 requires "App::Cmd::Setup" => "0";
 requires "Carp" => "0";
-requires "Config" => "0";
 requires "File::HomeDir" => "0.93";
 requires "File::ShareDir" => "0";
 requires "File::Spec" => "0";
@@ -14,7 +13,7 @@ requires "strict" => "0";
 requires "warnings" => "0";
 
 on 'build' => sub {
-  requires "Module::Build" => "0.3601";
+  requires "Module::Build" => "0.28";
 };
 
 on 'test' => sub {
@@ -27,14 +26,19 @@ on 'test' => sub {
   requires "Test::File" => "0";
   requires "Test::File::ShareDir" => "0";
   requires "Test::More" => "0.88";
+  requires "lib" => "0";
   requires "parent" => "0";
 };
 
 on 'configure' => sub {
-  requires "Module::Build" => "0.3601";
+  requires "Module::Build" => "0.28";
 };
 
 on 'develop' => sub {
+  requires "Pod::Coverage::TrustPod" => "0";
   requires "Test::CPAN::Changes" => "0.19";
+  requires "Test::CPAN::Meta" => "0";
+  requires "Test::Pod" => "1.41";
+  requires "Test::Pod::Coverage" => "1.08";
   requires "version" => "0.9901";
 };
